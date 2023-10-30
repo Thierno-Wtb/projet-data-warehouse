@@ -1,0 +1,216 @@
+----------------------------------------------------------------------------
+----------------- Script de création des tables constituantes du schéma relationnel en étoile----------------
+----------------------------------------------------------------------------
+---------------------------Cretaion du schema----------------------------------------------
+-- Création du schéma SPD_VENTES
+DROP SCHEMA IF EXISTS "SDP_VENTES";
+CREATE SCHEMA "SDP_VENTES";
+
+-----------------------------------------------------------------------------------------------
+-- Définir le schéma à utiliser
+SET SEARCH_PATH = "SDP_VENTES";
+
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°1 : "SDP_VENTES"."DIM_FOURNISSEUR" ----------
+----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS "DIM_FOURNISSEUR" ;
+CREATE TABLE "DIM_FOURNISSEUR" 
+(
+	"ID_DIM_FOURNISSEUR"	SERIAL NOT NULL,
+	"ID_FOURNISSEUR"     	INTEGER NOT NULL,
+	"FOURNISSEUR" 		    VARCHAR(255) NOT NULL , 
+	"DT_ADD"             	TIMESTAMP NOT NULL, 
+	"DT_UPD"             	TIMESTAMP NOT NULL,
+	CONSTRAINT "DIM_FOURNISSEUR_PKEY" PRIMARY KEY ("ID_DIM_FOURNISSEUR")
+);
+
+
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°2 : "SDP_VENTES"."DIM_CATEGORY" ----------
+----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS "DIM_CATEGORY" ;
+CREATE TABLE "DIM_CATEGORY" 
+(
+	"ID_DIM_CATEGORY"	SERIAL NOT NULL,
+	"ID_CATEGORY"     	INTEGER NOT NULL,
+	"CATEGORY" 		    VARCHAR(255),
+	"POSITION"       	INTEGER,
+	"DT_ADD"         	TIMESTAMP NOT NULL,
+	"DT_UPD"         	TIMESTAMP NOT NULL, 
+	CONSTRAINT "DIM_CATEGORY_PKEY" PRIMARY KEY ("ID_DIM_CATEGORY")
+);
+
+
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°3 : "SDP_VENTES"."DIM_PRODUIT" ----------
+----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS "DIM_PRODUIT" ;
+CREATE TABLE "DIM_PRODUIT" 
+(
+	"ID_DIM_PRODUIT"	    SERIAL 	  NOT NULL,
+	"ID_PRODUIT"         	INTEGER   NOT NULL,
+	"ID_DIM_CATEGORY"  	    INT NOT NULL,
+	"ID_DIM_FOURNISSEUR"  	INT NOT NULL,
+	"REFERENCE" 		    VARCHAR(255) NOT NULL,
+	"TYPE_PRODUIT"          VARCHAR(255),
+	"ACTIF"                 INTEGER,
+	"DT_ADD"    	 	    TIMESTAMP NOT NULL,
+	"DT_UPD"	            TIMESTAMP    NOT NULL,
+	CONSTRAINT "DIM_PRODUIT_PKEY" PRIMARY KEY ("ID_DIM_PRODUIT"),
+	FOREIGN KEY ("ID_DIM_CATEGORY") REFERENCES "DIM_CATEGORY" ("ID_DIM_CATEGORY"),
+	FOREIGN KEY ("ID_DIM_FOURNISSEUR") REFERENCES "DIM_FOURNISSEUR" ("ID_DIM_FOURNISSEUR")
+);
+
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°4 : "SDP_VENTES"."DIM_ADRESSE" ----------
+----------------------------------------------------------------------------
+DROP TABLE IF EXISTS "DIM_ADRESSE" ;
+CREATE TABLE "DIM_ADRESSE" 
+(
+	"ID_DIM_ADRESSE"	SERIAL NOT NULL,
+	"ID_ADRESSE"        INTEGER NOT NULL,
+	"ADRESSE" 		    VARCHAR(255),   
+    "VILLE" 		    VARCHAR(255), 
+	"CODE_POSTAL" 		VARCHAR(255), 
+	"TEL_FIXE" 		    VARCHAR(255), 
+	"TEL_PORTABLE" 		VARCHAR(255), 
+	"NOM_ENTREPRISE"    VARCHAR(255),
+	CONSTRAINT "DIM_ADRESSE_PKEY" PRIMARY KEY ("ID_DIM_ADRESSE")
+);
+-----------------------------------------------------------------------------
+------------ Table dimensionnelle N°5 : "SDP_VENTES"."DIM_COMMENTAIRE" ------
+-----------------------------------------------------------------------------
+
+-- DROP TABLE IF EXISTS "DIM_COMMENTAIRE" ;
+CREATE TABLE "DIM_COMMENTAIRE" 
+(
+	"ID_DIM_COMMENTAIRE"	    SERIAL NOT NULL,
+	"ID_COMMENTAIRE"            INTEGER  NOT NULL,
+	"COMMENTAIRE"               TEXT,
+	"INFO_UTILISATEUR" 	        VARCHAR(255),
+	"IP_ADRESSE" 		        VARCHAR(255),
+	"DT_ADD"                    TIMESTAMP,
+	"DT_UPD"                    TIMESTAMP, 
+	CONSTRAINT "DIM_COMMENTAIRE_PKEY" PRIMARY KEY ("ID_DIM_COMMENTAIRE")
+); 
+	
+----------------------------------------------------------------------------
+---------- Table dimensionnelle N°6 : "SDP_VENTES"."DIM_PAYS" ---------
+----------------------------------------------------------------------------
+-- DROP TABLE "DIM_PAYS";
+CREATE TABLE "DIM_PAYS"
+(
+    	"ID_DIM_PAYS" 	 SERIAL NOT NULL,
+	"ID_PAYS"            INTEGER NOT NULL,
+    	"ISO_CODE"	     VARCHAR(255),
+	"INDICATIF_PAYS"     INTEGER,
+	"ACTIF"              INTEGER,
+    	CONSTRAINT "DIM_PAYS_PKEY" PRIMARY KEY ("ID_DIM_PAYS")
+	
+);
+
+----------------------------------------------------------------------------
+---------- Table dimensionnelle N°7 : "SDP_VENTES"."DIM_GENRE" -------------
+----------------------------------------------------------------------------
+-- DROP TABLE "DIM_GENRE";
+CREATE TABLE "DIM_GENRE"
+(
+    	"ID_DIM_GENRE" 	     SERIAL NOT NULL,
+    	"ID_GENRE"           INTEGER NOT NULL,
+    	"TITRE"	             VARCHAR(255),
+     	CONSTRAINT "DIM_GENRE_PKEY" PRIMARY KEY ("ID_DIM_GENRE")
+);
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°8 : "SDP_VENTES"."DIM_CLIENT" -----------
+----------------------------------------------------------------------------
+
+-- DROP TABLE IF EXISTS "DIM_CLIENT" ;
+CREATE TABLE "DIM_CLIENT" 
+(
+	"ID_DIM_CLIENT"	      SERIAL  NOT NULL,
+	"ID_CLIENT"	          INTEGER NOT NULL,
+	"ID_DIM_ADRESSE"      INTEGER NOT NULL,
+	"ID_DIM_PAYS"         INTEGER NOT NULL, 
+	"ID_DIM_COMMENTAIRE"  INTEGER NOT NULL,
+	"ID_DIM_GENRE"        INTEGER NOT NULL,
+	"NOM" 		          VARCHAR(100) NOT NULL,
+	"PRENOM" 	          VARCHAR(100) NOT NULL,
+	"DT_ANNIVERSAIRE"     TIMESTAMP,
+	"NEWSLETTER"          INTEGER,
+	"ACTIF"               INTEGER,
+	"DT_ADD"              TIMESTAMP,
+	"DT_UPD"              TIMESTAMP,
+	CONSTRAINT "DIM_CLIENT_PKEY" PRIMARY KEY ("ID_DIM_CLIENT"),
+	CONSTRAINT "DIM_CLIENT_FKEY" FOREIGN KEY ("ID_DIM_ADRESSE") REFERENCES "DIM_ADRESSE" ("ID_DIM_ADRESSE"),
+	FOREIGN KEY ("ID_DIM_PAYS") REFERENCES "DIM_PAYS" ("ID_DIM_PAYS"),
+	FOREIGN KEY ("ID_DIM_COMMENTAIRE") REFERENCES "DIM_COMMENTAIRE" ("ID_DIM_COMMENTAIRE"),
+	FOREIGN KEY ("ID_DIM_GENRE") REFERENCES "DIM_GENRE" ("ID_DIM_GENRE")
+);
+
+----------------------------------------------------------------------------
+---------- Table dimensionnelle N°9 : "SDP_VENTES."DIM_CALENDRIER" ---------
+----------------------------------------------------------------------------
+
+-- DROP TABLE "DIM_CALENDRIER";
+CREATE TABLE "DIM_CALENDRIER"
+(
+    "ID_DIM_CALENDRIER" 	INTEGER NOT NULL,
+    "DT_JOUR"			    DATE NOT NULL,
+    "NB_ANNEE" 			    INTEGER NOT NULL,
+    "NB_SEMESTRE" 		    INTEGER NOT NULL,
+    "NB_TRIMESTRE" 		    INTEGER NOT NULL,
+    "NB_MOIS" 			    INTEGER NOT NULL,
+    "NB_JOUR_ANNEE" 		INTEGER NOT NULL,
+    "NB_JOUR_MOIS" 		    INTEGER NOT NULL,
+    "NB_JOUR_SEMAINE" 		INTEGER NOT NULL,
+    "NB_SEMAINE_ANNEE" 		INTEGER NOT NULL,
+    "LB_MOIS" 			    VARCHAR(100) NOT NULL,
+    "LB_JOUR" 			    VARCHAR(100) NOT NULL,
+    "BL_DERNIER_JOUR_MOIS"  INTEGER NOT NULL,
+    "BL_BISSEXTILE" 		INTEGER NOT NULL,
+    "BL_WEEK_END" 		    INTEGER NOT NULL,
+    "BL_JOUR_FERIE" 		INTEGER NOT NULL,
+    "LB_JOUR_FERIE" 		VARCHAR(100),
+    CONSTRAINT "DIM_CALENDRIER_PKEY" PRIMARY KEY ("ID_DIM_CALENDRIER")
+);
+
+----------------------------------------------------------------------------
+------------ Table dimensionnelle N°10 : "SDP_VENTES"."DIM_DETAIL_PRODUIT" ----------
+----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS "DIM_DETAIL" ;
+CREATE TABLE "DIM_DETAIL" 
+(
+	"ID_DIM_DETAIL"	    SERIAL NOT NULL,
+	"ID_DETAIL"         INTEGER NOT NULL, 
+	CONSTRAINT "DIM_DETAIL_PKEY" PRIMARY KEY ("ID_DIM_DETAIL")
+);
+----------------------------------------------------------------------------
+----------------- Table de faits : "SDP_VENTES"."FAIT_VENTE" -----------------
+----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS "FAIT_VENTE" ;
+CREATE TABLE "FAIT_VENTE" 
+(
+	"ID_FAIT_VENTE"         INTEGER NOT NULL,
+	"ID_DIM_PRODUIT"	    INTEGER NOT NULL,
+	"ID_DIM_CLIENT"	        INTEGER NOT NULL,
+	"ID_DIM_CALENDRIER"     INTEGER NOT NULL,
+    "ID_DIM_DETAIL"         INTEGER NOT NULL,
+	"REFERENCE"             VARCHAR(255),
+    "NOM_PRODUIT" 		    VARCHAR(255),
+	"QUANTITE"              INTEGER NOT NULL,
+	"TOTAL_REMISE"          FLOAT,
+	"TOTAL_PAYEMENT" 	    FLOAT NOT NULL,
+	"MODE_PAYEMENT"         VARCHAR(255),
+	"DT_VENTE"              TIMESTAMP NOT NULL,
+	"DT_LIVRAISON"    	    TIMESTAMP,
+	CONSTRAINT "FAIT_VENTE_PKEY" PRIMARY KEY ("ID_FAIT_VENTE"), 
+	CONSTRAINT "FAIT_VENTE_FKEY" FOREIGN KEY ("ID_DIM_CLIENT") REFERENCES "DIM_CLIENT" ("ID_DIM_CLIENT"),	
+	FOREIGN KEY ("ID_DIM_PRODUIT") REFERENCES "DIM_PRODUIT" ("ID_DIM_PRODUIT"),
+	FOREIGN KEY ("ID_DIM_CALENDRIER") REFERENCES "DIM_CALENDRIER" ("ID_DIM_CALENDRIER"),
+	FOREIGN KEY ("ID_DIM_DETAIL") REFERENCES "DIM_DETAIL" ("ID_DIM_DETAIL")	
+);
